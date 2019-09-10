@@ -137,6 +137,29 @@ namespace detail
 #endif
 		}
 	};
+
+	template<qualifier Q>
+	struct compute_normalize<4, float, Q, true>
+	{
+		GLM_FUNC_QUALIFIER static vec<4, float, Q> call(vec<4, float, Q> const& v)
+		{
+			float32x4_t p = vmulq_f32(v.data, v.data);
+#if GLM_ARCH & GLM_ARCH_ARMV8_BIT
+			p = vpaddq_f32(p, p);
+			p = vpaddq_f32(p, p);
+#else
+			float32x2_t t = vpadd_f32(vget_low_f32(p), vget_high_f32(p));
+			t = vpadd_f32(t, t);
+			p = vcombine_f32(t, t);
+#endif
+
+			float32x4_t vd = vrsqrteq_f32(p);
+			vec<4, float, Q> Result;
+			Result.data = vmulq_f32(v, vd);
+			return Result;
+		}
+	};
+
 }//namespace detail
 }//namespace glm
 

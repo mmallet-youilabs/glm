@@ -577,7 +577,14 @@ namespace detail {
 		static vec<4, float, Q> call(vec<4, float, Q> const& a, vec<4, float, Q> const& b)
 		{
 			vec<4, float, Q> Result;
+#if GLM_ARCH & GLM_ARCH_ARMV8_BIT
 			Result.data = vdivq_f32(a.data, b.data);
+#else
+			Result[0] = a[0] / b[0];
+			Result[1] = a[1] / b[1];
+			Result[2] = a[2] / b[2];
+			Result[3] = a[3] / b[3];
+#endif
 			return Result;
 		}
 	};
